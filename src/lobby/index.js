@@ -91,29 +91,15 @@ export default function Lobby ({ socket }) {
       engine.run()
       setIsRunning(true)
     })
-
-    updateSprites()
   }, [])
 
-  const updateName = () => {
-    socket.emit('setName', name)
-  }
-
-  const updateSprites = () => {
+  useEffect(() => {
     socket.emit('setPixelData', {
       scout: { size: scoutSize, buffer: scoutPixels },
       fighter: { size: fighterSize, buffer: fighterPixels },
       carrier: { size: carrierSize, buffer: carrierPixels }
     })
-  }
-
-  const startGame = () => {
-    socket.emit('start')
-  }
-
-  const kickPlayer = (id) => {
-    socket.emit('kick', id)
-  }
+  }, [scoutPixels, fighterPixels, carrierPixels])
 
   if (returnHome) return <Redirect to='/' />
   return (
@@ -126,12 +112,11 @@ export default function Lobby ({ socket }) {
             <Editor currentColor={color} pixelUpdater={setFighterPixels} width={fighterSize} height={fighterSize} />
             <Editor currentColor={color} pixelUpdater={setCarrierPixels} width={carrierSize} height={carrierSize} />
             <ColorPicker color={color} onChange={color => setColor(color.rgb)} />
-            <button onClick={updateSprites}>Save</button>
           </EditorContainer>
 
           <NameContainer>
             <NameInput type='text' value={name} onChange={e => setName(e.target.value)} />
-            <button onClick={updateName}>Change Name</button>
+            <button onClick={() => socket.emit('setName', name)}>Change Name</button>
           </NameContainer>
 
           <PlayerContainer>
@@ -140,7 +125,7 @@ export default function Lobby ({ socket }) {
                 return (
                   <PlayerRow key={player.id}>
                     <span style={{ color: 'red' }}>{player.name}</span>
-                    {isHost ? <button onClick={startGame}>Start</button> : null}
+                    {isHost ? <button onClick={() => socket.emit('start')}>Start</button> : null}
                     <br />
                   </PlayerRow>
                 )
@@ -148,7 +133,7 @@ export default function Lobby ({ socket }) {
                 return (
                   <PlayerRow key={player.id}>
                     <span style={{ color: 'white' }}>{player.name}</span>
-                    {isHost ? <button onClick={() => kickPlayer(player.id)}>Kick</button> : null}
+                    {isHost ? <button onClick={() => socket.emit('kick', player.id)}>Kick</button> : null}
                     <br />
                   </PlayerRow>
                 )

@@ -57,10 +57,10 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
           )
           if ((index + 1) % width === 0) {
             return (
-              <>
+              <span key={`pixel-${index}`}>
                 {pix}
                 <br />
-              </>
+              </span>
             )
           }
           return pix
