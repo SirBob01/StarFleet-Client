@@ -4415,10 +4415,10 @@
     "readable-stream" "^2.0.0"
     "stream-shift" "^1.0.0"
 
-"dynamojs-engine@1.0.1":
-  "integrity" "sha512-2PO2xPIsB57MaFfnnE6cJzSZUzGjFkNAL4HVk88sTLvFc5XrJAhNd2j1fzFPJtA2Y9t5nv6U5fdQlWkneFLHnQ=="
-  "resolved" "https://registry.npmjs.org/dynamojs-engine/-/dynamojs-engine-1.0.1.tgz"
-  "version" "1.0.1"
+"dynamojs-engine@1.0.2":
+  "integrity" "sha512-lz2DlwYzAAyHQ78OD7Q15lFJHpgrOw+kmH+8QbW02R4/wyJHZRnw86CVNwL3kT+FylB2WR/qLucHzWPxin/DgQ=="
+  "resolved" "https://registry.npmjs.org/dynamojs-engine/-/dynamojs-engine-1.0.2.tgz"
+  "version" "1.0.2"
 
 "ecc-jsbn@~0.1.1":
   "integrity" "sha1-OoOpBOVDUyh4dMVkt1SThoSamMk="

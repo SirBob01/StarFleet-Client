@@ -10,7 +10,7 @@ import Main from '../game/Main'
 
 const Game = styled.canvas`
   width: 100%;
-  height: 100%:
+  height: 100%;
   overflow: hidden;
 `
 
@@ -60,11 +60,9 @@ export default function Lobby ({ socket }) {
   const [name, setName] = useState('')
   const [isHost, setIsHost] = useState(false)
   const [playerList, setPlayerList] = useState([])
-  const [isRunning, setIsRunning] = useState(false)
+  const [startData, setStartData] = useState(null)
 
   const [returnHome, setReturnHome] = useState(false)
-
-  const [, setEngine] = useState()
 
   useEffect(() => {
     let isMounted = true
@@ -81,27 +79,31 @@ export default function Lobby ({ socket }) {
       if (isMounted) {
         setPlayerList(data.players)
         setName(data.name)
-        setIsHost(data.isHost)  
+        setIsHost(data.isHost)
       }
     })
 
     socket.on('kick', () => {
       if (isMounted) {
         alert('You have been kicked from the game!')
-        setReturnHome(true)  
+        setReturnHome(true)
       }
     })
 
     socket.on('start', data => {
       if (isMounted) {
-        const engine = new dynamo.Engine(new Main(socket, data))
-        setEngine(engine)
-        engine.run()
-        setIsRunning(true)  
+        setStartData(data)
       }
     })
     return () => { isMounted = false }
   }, [])
+
+  useEffect(() => {
+    if (startData !== null) {
+      const engine = new dynamo.Engine(new Main(socket, startData))
+      engine.run()  
+    }
+  }, [startData])
 
   useEffect(() => {
     socket.emit('setPixelData', {
@@ -113,10 +115,10 @@ export default function Lobby ({ socket }) {
 
   if (returnHome) return <Redirect to='/' />
   return (
-    <LobbyContainer>
-      {isRunning
+    <>
+      {startData
         ? <Game id='display' />
-        : <>
+        : <LobbyContainer>
           <EditorContainer>
             <Editor currentColor={color} pixelUpdater={setScoutPixels} width={scoutSize} height={scoutSize} />
             <Editor currentColor={color} pixelUpdater={setFighterPixels} width={fighterSize} height={fighterSize} />
@@ -150,7 +152,7 @@ export default function Lobby ({ socket }) {
               }
             })}
           </PlayerContainer>
-          </>}
-    </LobbyContainer>
+          </LobbyContainer>}
+    </>
   )
 }
