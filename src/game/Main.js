@@ -32,7 +32,7 @@ class Main extends dynamo.GameState {
     }
 
     this.socket.on('broadcast', data => {
-      
+
     })
   }
 

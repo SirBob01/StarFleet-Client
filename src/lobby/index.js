@@ -101,7 +101,7 @@ export default function Lobby ({ socket }) {
   useEffect(() => {
     if (startData !== null) {
       const engine = new dynamo.Engine(new Main(socket, startData))
-      engine.run()  
+      engine.run()
     }
   }, [startData])
 
