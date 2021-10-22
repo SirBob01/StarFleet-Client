@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import dynamo from 'dynamojs-engine'
+import Main from '../game/Main'
 import { Redirect, useParams } from 'react-router'
 import { SketchPicker as ColorPicker } from 'react-color'
 import Editor from './Editor'
 
+const Game = styled.canvas`
+  width: 100%;
+  height: 100%:
+  overflow: hidden;
+`
+
 const LobbyContainer = styled.div`
   width: 100%;
   height: 100%;
-  background-color: #000055;
-  overflow: auto;
+  background-color: rgb(0, 0, 33);
+  overflow: hidden;
 `
 
 const EditorContainer = styled.div`
@@ -51,8 +58,11 @@ export default function Lobby ({ socket }) {
   const [name, setName] = useState('')
   const [isHost, setIsHost] = useState(false)
   const [playerList, setPlayerList] = useState([])
+  const [isRunning, setIsRunning] = useState(false)
 
   const [returnHome, setReturnHome] = useState(false)
+
+  const [engine, setEngine] = useState()
 
   useEffect(() => {
     socket.emit('join', lobbyKey, success => {
@@ -72,6 +82,15 @@ export default function Lobby ({ socket }) {
       alert('You have been kicked from the game!')
       setReturnHome(true)
     })
+
+    socket.on('start', data => {
+      const engine = new dynamo.Engine(new Main(socket, data))
+      setEngine(engine)
+      engine.run()
+      setIsRunning(true)
+    })
+
+    updateSprites()
   }, [])
 
   const updateName = () => {
@@ -80,9 +99,9 @@ export default function Lobby ({ socket }) {
 
   const updateSprites = () => {
     socket.emit('setPixelData', {
-      scout: scoutPixels,
-      fighter: fighterPixels,
-      carrier: carrierPixels
+      scout: {size: scoutSize, buffer: scoutPixels},
+      fighter: {size: fighterSize, buffer: fighterPixels},
+      carrier: {size: carrierSize, buffer: carrierPixels}
     })
   }
 
@@ -97,41 +116,45 @@ export default function Lobby ({ socket }) {
   if (returnHome) return <Redirect to='/' />
   return (
     <LobbyContainer>
-      <EditorContainer>
-        <Editor currentColor={color} pixelUpdater={setScoutPixels} width={8} height={8} />
-        <Editor currentColor={color} pixelUpdater={setFighterPixels} width={12} height={12} />
-        <Editor currentColor={color} pixelUpdater={setCarrierPixels} width={24} height={24} />
-        <ColorPicker color={color} onChange={color => setColor(color.rgb)} />
-        <button onClick={updateSprites}>Save</button>
-      </EditorContainer>
-      
-      <NameContainer>
-        <NameInput type='text' value={name} onChange={e => setName(e.target.value)}/>
-        <button onClick={updateName}>Change Name</button>
-      </NameContainer>
+      {isRunning ? 
+        <Game id='display'/> :
+        <> 
+          <EditorContainer>
+            <Editor currentColor={color} pixelUpdater={setScoutPixels} width={8} height={8} />
+            <Editor currentColor={color} pixelUpdater={setFighterPixels} width={12} height={12} />
+            <Editor currentColor={color} pixelUpdater={setCarrierPixels} width={24} height={24} />
+            <ColorPicker color={color} onChange={color => setColor(color.rgb)} />
+            <button onClick={updateSprites}>Save</button>
+          </EditorContainer>
+          
+          <NameContainer>
+            <NameInput type='text' value={name} onChange={e => setName(e.target.value)}/>
+            <button onClick={updateName}>Change Name</button>
+          </NameContainer>
 
-      <PlayerContainer>
-        {playerList.map((player, index) => {
-          if(player.host) {
-            return (
-              <PlayerRow>
-                <span style={{color: 'red'}}>{player.name}</span>
-                {isHost ? <button onClick={startGame}>Start</button> : null}
-                <br/>
-              </PlayerRow>
-            )
-          }
-          else {
-            return (
-              <PlayerRow>
-                <span style={{color: 'white'}}>{player.name}</span>
-                {isHost ? <button onClick={() => kickPlayer(player.id)}>Kick</button> : null }
-                <br/>
-              </PlayerRow>
-            )
-          }
-        })}
-      </PlayerContainer>
+          <PlayerContainer>
+            {playerList.map((player, index) => {
+              if(player.host) {
+                return (
+                  <PlayerRow key={player.id}>
+                    <span style={{color: 'red'}}>{player.name}</span>
+                    {isHost ? <button onClick={startGame}>Start</button> : null}
+                    <br/>
+                  </PlayerRow>
+                )
+              }
+              else {
+                return (
+                  <PlayerRow key={player.id}>
+                    <span style={{color: 'white'}}>{player.name}</span>
+                    {isHost ? <button onClick={() => kickPlayer(player.id)}>Kick</button> : null }
+                    <br/>
+                  </PlayerRow>
+                )
+              }
+            })}
+          </PlayerContainer>
+        </>}
     </LobbyContainer>
   )
 }
