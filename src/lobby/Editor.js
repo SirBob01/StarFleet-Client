@@ -3,10 +3,9 @@ import styled from 'styled-components'
 import transparent from '../images/transparent.png'
 
 const EditorContainer = styled.div`
-  width: 100%;
-  height: 100%;
   text-align: center;
   color: white;
+  display: inline-block
 `
 
 const PixelContainer = styled.div`
@@ -36,7 +35,6 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
   const [mouseHold, setMouseHold] = useState(false)
 
   const updatePixels = (index) => {
-    console.log('Hello')
     const newPixels = pixels.slice()
     newPixels[index] = currentColor
     setPixels(newPixels)
@@ -44,7 +42,6 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
   }
 
   return (
-
     <EditorContainer onMouseDown={() => setMouseHold(true)} onMouseUp={() => setMouseHold(false)}>
       <span>Front</span>
       <PixelContainer>
@@ -56,14 +53,14 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
               onMouseDown={() => updatePixels(index)}
 
               color={pixel}
-              size={32}
+              size={16}
             />
           )
           if ((index + 1) % width === 0) {
             return (
               <>
                 {pix}
-                <br />
+                <br/>
               </>
             )
           }
