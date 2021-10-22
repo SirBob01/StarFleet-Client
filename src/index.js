@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { io } from 'socket.io-client'
+import { io as Socket } from 'socket.io-client'
 
 import './index.css'
 import Home from './home'
@@ -10,7 +10,7 @@ import Lobby from './lobby'
 import reportWebVitals from './reportWebVitals'
 
 // Connect to the server
-const socket = new io('http://localhost:3200')
+const socket = new Socket('http://localhost:3200')
 
 ReactDOM.render(
   <React.StrictMode>

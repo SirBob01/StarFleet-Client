@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import dynamo from 'dynamojs-engine'
-import Main from '../game/Main'
 import { Redirect, useParams } from 'react-router'
+import styled from 'styled-components'
+
 import { SketchPicker as ColorPicker } from 'react-color'
 import Editor from './Editor'
+
+import dynamo from 'dynamojs-engine'
+import Main from '../game/Main'
 
 const Game = styled.canvas`
   width: 100%;
@@ -39,9 +41,9 @@ const PlayerRow = styled.div`
 
 `
 
-const scoutSize = 8;
-const fighterSize = 12;
-const carrierSize = 24;
+const scoutSize = 6
+const fighterSize = 8
+const carrierSize = 16
 
 const generatePixelArray = (size) => {
   return Array(size * size).fill({ r: 255, g: 255, b: 255, a: 0 })
@@ -50,7 +52,7 @@ const generatePixelArray = (size) => {
 export default function Lobby ({ socket }) {
   const { lobbyKey } = useParams()
   const [color, setColor] = useState({ r: 255, g: 255, b: 255, a: 1 })
-  
+
   const [scoutPixels, setScoutPixels] = useState(generatePixelArray(scoutSize))
   const [fighterPixels, setFighterPixels] = useState(generatePixelArray(fighterSize))
   const [carrierPixels, setCarrierPixels] = useState(generatePixelArray(carrierSize))
@@ -62,7 +64,7 @@ export default function Lobby ({ socket }) {
 
   const [returnHome, setReturnHome] = useState(false)
 
-  const [engine, setEngine] = useState()
+  const [, setEngine] = useState()
 
   useEffect(() => {
     socket.emit('join', lobbyKey, success => {
@@ -99,9 +101,9 @@ export default function Lobby ({ socket }) {
 
   const updateSprites = () => {
     socket.emit('setPixelData', {
-      scout: {size: scoutSize, buffer: scoutPixels},
-      fighter: {size: fighterSize, buffer: fighterPixels},
-      carrier: {size: carrierSize, buffer: carrierPixels}
+      scout: { size: scoutSize, buffer: scoutPixels },
+      fighter: { size: fighterSize, buffer: fighterPixels },
+      carrier: { size: carrierSize, buffer: carrierPixels }
     })
   }
 
@@ -116,45 +118,44 @@ export default function Lobby ({ socket }) {
   if (returnHome) return <Redirect to='/' />
   return (
     <LobbyContainer>
-      {isRunning ? 
-        <Game id='display'/> :
-        <> 
+      {isRunning
+        ? <Game id='display' />
+        : <>
           <EditorContainer>
-            <Editor currentColor={color} pixelUpdater={setScoutPixels} width={8} height={8} />
-            <Editor currentColor={color} pixelUpdater={setFighterPixels} width={12} height={12} />
-            <Editor currentColor={color} pixelUpdater={setCarrierPixels} width={24} height={24} />
+            <Editor currentColor={color} pixelUpdater={setScoutPixels} width={scoutSize} height={scoutSize} />
+            <Editor currentColor={color} pixelUpdater={setFighterPixels} width={fighterSize} height={fighterSize} />
+            <Editor currentColor={color} pixelUpdater={setCarrierPixels} width={carrierSize} height={carrierSize} />
             <ColorPicker color={color} onChange={color => setColor(color.rgb)} />
             <button onClick={updateSprites}>Save</button>
           </EditorContainer>
-          
+
           <NameContainer>
-            <NameInput type='text' value={name} onChange={e => setName(e.target.value)}/>
+            <NameInput type='text' value={name} onChange={e => setName(e.target.value)} />
             <button onClick={updateName}>Change Name</button>
           </NameContainer>
 
           <PlayerContainer>
             {playerList.map((player, index) => {
-              if(player.host) {
+              if (player.host) {
                 return (
                   <PlayerRow key={player.id}>
-                    <span style={{color: 'red'}}>{player.name}</span>
+                    <span style={{ color: 'red' }}>{player.name}</span>
                     {isHost ? <button onClick={startGame}>Start</button> : null}
-                    <br/>
+                    <br />
                   </PlayerRow>
                 )
-              }
-              else {
+              } else {
                 return (
                   <PlayerRow key={player.id}>
-                    <span style={{color: 'white'}}>{player.name}</span>
-                    {isHost ? <button onClick={() => kickPlayer(player.id)}>Kick</button> : null }
-                    <br/>
+                    <span style={{ color: 'white' }}>{player.name}</span>
+                    {isHost ? <button onClick={() => kickPlayer(player.id)}>Kick</button> : null}
+                    <br />
                   </PlayerRow>
                 )
               }
             })}
           </PlayerContainer>
-        </>}
+          </>}
     </LobbyContainer>
   )
 }

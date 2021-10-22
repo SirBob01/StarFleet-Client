@@ -10,7 +10,7 @@ const EditorContainer = styled.div`
 
 const PixelContainer = styled.div`
   font-size: 0;
-`;
+`
 
 const Pixel = styled.div`
   width: ${({ size }) => `${size}px`};
@@ -51,7 +51,6 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
               key={`pixel-${index}`}
               onMouseEnter={() => { if (mouseHold) updatePixels(index) }}
               onMouseDown={() => updatePixels(index)}
-
               color={pixel}
               size={16}
             />
@@ -60,7 +59,7 @@ export default function Editor ({ currentColor, pixelUpdater, width, height }) {
             return (
               <>
                 {pix}
-                <br/>
+                <br />
               </>
             )
           }
