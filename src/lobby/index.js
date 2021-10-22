@@ -67,30 +67,40 @@ export default function Lobby ({ socket }) {
   const [, setEngine] = useState()
 
   useEffect(() => {
+    let isMounted = true
     socket.emit('join', lobbyKey, success => {
-      if (!success) {
-        alert('Game does not exist with this key!')
-        setReturnHome(true)
+      if (isMounted) {
+        if (!success) {
+          alert('Game does not exist with this key!')
+          setReturnHome(true)
+        }
       }
     })
 
     socket.on('lobby', data => {
-      setPlayerList(data.players)
-      setName(data.name)
-      setIsHost(data.isHost)
+      if (isMounted) {
+        setPlayerList(data.players)
+        setName(data.name)
+        setIsHost(data.isHost)  
+      }
     })
 
     socket.on('kick', () => {
-      alert('You have been kicked from the game!')
-      setReturnHome(true)
+      if (isMounted) {
+        alert('You have been kicked from the game!')
+        setReturnHome(true)  
+      }
     })
 
     socket.on('start', data => {
-      const engine = new dynamo.Engine(new Main(socket, data))
-      setEngine(engine)
-      engine.run()
-      setIsRunning(true)
+      if (isMounted) {
+        const engine = new dynamo.Engine(new Main(socket, data))
+        setEngine(engine)
+        engine.run()
+        setIsRunning(true)  
+      }
     })
+    return () => { isMounted = false }
   }, [])
 
   useEffect(() => {
