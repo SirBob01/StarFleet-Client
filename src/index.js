@@ -1,12 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { io } from 'socket.io-client';
+
 import './index.css';
-import App from './App';
+import Home from './home';
+import Lobby from './lobby';
+
 import reportWebVitals from './reportWebVitals';
+
+// Connect to the server
+const socket = new io('http://localhost:3200')
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router>
+      <Switch>
+        <Route path="/:lobbyKey">
+          <Lobby socket={socket}/>
+        </Route>
+        <Route path="/">
+          <Home socket={socket}/>
+        </Route>
+      </Switch>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
