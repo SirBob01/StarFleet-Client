@@ -9,8 +9,11 @@ import dynamo from 'dynamojs-engine'
 import Main from '../game/Main'
 
 const Game = styled.canvas`
+  top: 0;
+  left: 0;  
   width: 100%;
   height: 100%;
+  position: fixed;
   overflow: hidden;
 `
 
