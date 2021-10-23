@@ -40,8 +40,8 @@ export default class Minimap extends dynamo.AABB {
     const visibleArea = new dynamo.AABB(
       this.camera.position.x * this.o.x,
       this.camera.position.y * this.o.y,
-      this.camera.dimensions.x * this.o.x,
-      this.camera.dimensions.y * this.o.y
+      this.camera.dimensions.x * this.o.x / this.camera.currentZoom,
+      this.camera.dimensions.y * this.o.y / this.camera.currentZoom
     )
     visibleArea.center = visibleArea.center.add(this.min())
     display.draw_rect(visibleArea, new dynamo.Color(255, 255, 255), false, 1)
@@ -58,6 +58,7 @@ export default class Minimap extends dynamo.AABB {
     this.dim.x = minimapWidth
     this.dim.y = minimapHeight
 
+    // Adjust scaling factor
     this.o = this.dim.copy()
     this.o.x /= this.camera.worldDimensions.x
     this.o.y /= this.camera.worldDimensions.y
