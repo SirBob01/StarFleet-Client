@@ -2,6 +2,8 @@ import dynamo from 'dynamojs-engine'
 import Camera from './Camera'
 import Minimap from './Minimap'
 import SelectBox from './SelectBox'
+import Starfield from './Starfield'
+import TexturesWorker from './textures.worker'
 
 function generateSprite (colorData) {
   const pixelSize = 32
@@ -18,10 +20,48 @@ function generateSprite (colorData) {
   return surface
 }
 
-export default class Main extends dynamo.GameState {
+export default class Loading extends dynamo.GameState {
   constructor (socket, startData) {
     super()
     this.socket = socket
+    this.startData = startData
+  }
+
+  on_entry(core) {
+    //@ts-ignore
+    const worker = new TexturesWorker()
+    const windowDimensions = core.display.rect().dim
+    worker.addEventListener('message', e => {
+      // Render the nebula background
+      const nebula = new dynamo.Surface(windowDimensions.x, windowDimensions.y)
+      for(let x = 0; x < windowDimensions.x; x++) {
+        for(let y = 0; y < windowDimensions.y; y++) {
+          let pixelData = e.data.nebula[y * windowDimensions.x + x]
+          nebula.draw_rect(
+            new dynamo.AABB(x, y, 1, 1), 
+            new dynamo.Color(pixelData.r, pixelData.g, pixelData.b, pixelData.a), true)
+        }
+      }
+
+      this.set_next(new Main(this.socket, this.startData, { nebula }))
+      worker.terminate()
+    })
+    worker.postMessage({
+      windowDimensions
+    })
+  }
+
+  update(core) {
+    core.display.fill(new dynamo.Color(0, 0, 0))
+    core.display.draw_text('Loading...', 'Helvetica', 24, new dynamo.Color(255, 255, 255), core.display.rect().dim.scale(0.5))
+  }
+}
+
+class Main extends dynamo.GameState {
+  constructor (socket, startData, textures) {
+    super()
+    this.socket = socket
+    this.textures = textures
     this.sprites = {}
 
     this.mapSize = new dynamo.Vec2D(startData.mapSize.x, startData.mapSize.y)
@@ -46,13 +86,14 @@ export default class Main extends dynamo.GameState {
   on_entry (core) {
     this.camera = new Camera(core.display.rect().dim, this.mapSize)
     this.minimap = new Minimap(this.camera, this.socket.id)
+    this.starfield = new Starfield(this.camera)
   }
 
   renderGrid (display) {
     const viewport = display.rect().dim
     const min = this.camera.position.sub(viewport.scale(0.5))
     const max = this.camera.position.add(viewport.scale(0.5))
-    const gap = 200
+    const gap = 300
 
     const closestMultiple = (n) => {
       // Find the closest multiple of (gap) from n
@@ -79,7 +120,9 @@ export default class Main extends dynamo.GameState {
     this.camera.clamp()
     this.minimap.update(core.input.mouse, core.input.get_state('Mouse1'))
 
-    core.display.fill(new dynamo.Color(20, 20, 40))
+    core.display.fill(new dynamo.Color(0, 0, 0))
+    core.display.draw_surface(this.textures.nebula, core.display.rect())
+    this.starfield.render(core.display)
     this.renderGrid(core.display)
 
     // Draw entities
@@ -106,19 +149,21 @@ export default class Main extends dynamo.GameState {
 
     // UI elements
     if (core.input.get_pressed('Mouse1')) {
-      const worldPos = core.input.mouse.add(this.camera.position.sub(this.camera.dimensions.scale(0.5)))
+      const worldPos = core.input.mouse.sub(this.camera.dimensions.scale(0.5)).scale(1 / this.camera.currentZoom).add(this.camera.position)
       this.selectBox = new SelectBox(worldPos)
     }
 
     if (this.selectBox !== null && core.input.get_state('Mouse1')) {
-      const worldPos = core.input.mouse.add(this.camera.position.sub(this.camera.dimensions.scale(0.5)))
+      const worldPos = core.input.mouse.sub(this.camera.dimensions.scale(0.5)).scale(1 / this.camera.currentZoom).add(this.camera.position)
+      core.display.draw_rect(this.camera.transform(this.selectBox), new dynamo.Color(0, 255, 0), false, 3, 'source-over', true)
+      core.display.draw_rect(this.camera.transform(this.selectBox), new dynamo.Color(0, 255, 0, 30), true, 1, 'source-over', true)
+
       this.selectBox.update(worldPos)
+
       for (const entity of this.entities) {
         const aabb = new dynamo.AABB(entity.center.x, entity.center.y, entity.size * 2, entity.size * 2)
-        core.display.draw_rect(this.camera.transform(this.selectBox), new dynamo.Color(0, 255, 0), false, 3, 'source-over', true)
-        core.display.draw_rect(this.camera.transform(this.selectBox), new dynamo.Color(0, 255, 0, 30), true, 1, 'source-over', true)
         if (aabb.is_colliding(this.selectBox)) {
-          console.log('Hi')
+          core.display.draw_rect(this.camera.transform(aabb), new dynamo.Color(255, 0, 255), false)
         }
       }
     } else {

@@ -6,7 +6,7 @@ import { SketchPicker as ColorPicker } from 'react-color'
 import Editor from './Editor'
 
 import dynamo from 'dynamojs-engine'
-import Main from '../game/Main'
+import Loading from '../game/Main'
 
 const Game = styled.canvas`
   top: 0;
@@ -103,7 +103,7 @@ export default function Lobby ({ socket }) {
 
   useEffect(() => {
     if (startData !== null) {
-      const engine = new dynamo.Engine(new Main(socket, startData))
+      const engine = new dynamo.Engine(new Loading(socket, startData))
       engine.run()
     }
   }, [startData])
