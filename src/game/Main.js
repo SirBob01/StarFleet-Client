@@ -32,18 +32,20 @@ export default class Loading extends dynamo.GameState {
     const worker = new TexturesWorker()
     const windowDimensions = core.display.rect().dim
     worker.addEventListener('message', e => {
+      console.log('Rendering textures!')
       // Render the nebula background
       const nebula = new dynamo.Surface(windowDimensions.x, windowDimensions.y)
-      for(let x = 0; x < windowDimensions.x; x++) {
-        for(let y = 0; y < windowDimensions.y; y++) {
-          let pixelData = e.data.nebula[y * windowDimensions.x + x]
-          nebula.draw_rect(
-            new dynamo.AABB(x, y, 1, 1), 
-            new dynamo.Color(pixelData.r, pixelData.g, pixelData.b, pixelData.a), true)
-        }
-      }
+      let colorData = nebula.surface.createImageData(windowDimensions.x, windowDimensions.y);
+      colorData.data.set(e.data.nebula);
+      nebula.surface.putImageData(colorData, 0, 0)
 
-      this.set_next(new Main(this.socket, this.startData, { nebula }))
+      // Render the planet
+      const planet = new dynamo.Surface(600, 600)
+      colorData = nebula.surface.createImageData(600, 600);
+      colorData.data.set(e.data.planet);
+      planet.surface.putImageData(colorData, 0, 0)
+
+      this.set_next(new Main(this.socket, this.startData, { nebula, planet }))
       worker.terminate()
     })
     worker.postMessage({
@@ -122,6 +124,7 @@ class Main extends dynamo.GameState {
 
     core.display.fill(new dynamo.Color(0, 0, 0))
     core.display.draw_surface(this.textures.nebula, core.display.rect())
+    core.display.draw_surface(this.textures.planet, new dynamo.AABB(300, 300, 600, 600))
     this.starfield.render(core.display)
     this.renderGrid(core.display)
 
