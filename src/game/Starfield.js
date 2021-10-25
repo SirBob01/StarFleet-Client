@@ -12,13 +12,13 @@ export default class Starfield {
     this.stars = []
     this.camera = camera
 
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < this.camera.dimensions.x; i++) {
       this.stars.push({
         pos: new dynamo.Vec2D(
-          dynamo.randrange(0, this.camera.dimensions.x),
-          dynamo.randrange(0, this.camera.dimensions.y)
+          dynamo.randrange(-this.camera.dimensions.x, this.camera.dimensions.x * 2),
+          dynamo.randrange(-this.camera.dimensions.y, this.camera.dimensions.y * 2)
         ),
-        size: dynamo.randrange(0.5, 1.2),
+        size: dynamo.randrange(0.5, 1.5),
         color: starColors[Math.floor(dynamo.randrange(0, starColors.length))]
       })
     }
