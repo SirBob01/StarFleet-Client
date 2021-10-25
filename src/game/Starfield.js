@@ -29,7 +29,7 @@ export default class Starfield {
       const offset = new dynamo.Vec2D(
         this.camera.position.x / this.camera.worldDimensions.x,
         this.camera.position.y / this.camera.worldDimensions.y
-      ).scale(star.size * 10)
+      ).scale(-star.size * 30)
       display.draw_circle(star.pos.add(offset), star.size, star.color, true)
     }
   }
