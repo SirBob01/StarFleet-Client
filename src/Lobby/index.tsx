@@ -6,7 +6,7 @@ import { SketchPicker as ColorPicker } from 'react-color';
 import { Editor } from './Editor';
 
 import dynamo, { Color } from 'dynamojs-engine';
-import { Loading } from '../Game/Main';
+import { Loading } from '../Game';
 import { Socket } from 'socket.io-client';
 
 const Game = styled.canvas`
