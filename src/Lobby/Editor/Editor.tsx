@@ -1,17 +1,6 @@
 import { Color } from 'dynamojs-engine';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Pixel } from './Pixel';
-
-const EditorContainer = styled.div`
-  text-align: center;
-  color: white;
-  display: inline-block;
-`;
-
-const PixelContainer = styled.div`
-  font-size: 0;
-`;
+import { EditorContainer, Pixel, PixelContainer } from './EditorStyles';
 
 interface EditorProps {
   currentColor: Color;
@@ -69,4 +58,4 @@ function Editor({ currentColor, pixelUpdater, width, height }: EditorProps) {
   );
 }
 
-export { Editor };
+export default Editor;

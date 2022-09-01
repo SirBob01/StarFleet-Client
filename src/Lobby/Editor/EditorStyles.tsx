@@ -6,7 +6,17 @@ interface PixelProps {
   readonly color: Color;
 }
 
-const Pixel = styled.div<PixelProps>`
+export const EditorContainer = styled.div`
+  text-align: center;
+  color: white;
+  display: inline-block;
+`;
+
+export const PixelContainer = styled.div`
+  font-size: 0;
+`;
+
+export const Pixel = styled.div<PixelProps>`
   width: ${({ size }) => `${size}px`};
   height: ${({ size }) => `${size}px`};
   background-color: ${({ color }) =>
@@ -24,5 +34,3 @@ const Pixel = styled.div<PixelProps>`
   border: 1px solid #AAAAAA;
   display: inline-block;
 `;
-
-export { Pixel };

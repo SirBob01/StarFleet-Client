@@ -18,7 +18,6 @@ class Loading extends GameState {
     const worker = new TexturesWorker();
     const windowDimensions = core.display.rect().dim;
     worker.addEventListener('message', (e) => {
-      console.log('Rendering textures...');
       // Render the nebula background
       const nebula = new Surface(windowDimensions.x, windowDimensions.y);
       let colorData = nebula.surface.createImageData(
