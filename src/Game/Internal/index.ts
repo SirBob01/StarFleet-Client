@@ -4,10 +4,4 @@ import { SelectBox } from './SelectBox';
 import { Starfield } from './Starfield';
 import { perlin } from './Perlin';
 
-export {
-  Camera,
-  Minimap,
-  SelectBox,
-  Starfield,
-  perlin
-}
+export { Camera, Minimap, SelectBox, Starfield, perlin };

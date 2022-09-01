@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 
 interface HomeProps {
-  socket: Socket
+  socket: Socket;
 }
 
 function Home({ socket }: HomeProps) {

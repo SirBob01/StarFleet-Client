@@ -9,21 +9,22 @@ import { Lobby } from './Lobby';
 
 import reportWebVitals from './reportWebVitals';
 
-// Connect to the server
-const socket = io('http://localhost:3200');
-
-// eslint-disable-next-line
-const container = createRoot(document.getElementById('root')!);
-container.render(
-  <React.StrictMode>
-    <Router>
-      <Routes>
-        <Route path="/:lobbyKey" element={ <Lobby socket={socket} /> } />
-        <Route path="/" element={<Home socket={socket} />} />
-      </Routes>
-    </Router>
-  </React.StrictMode>
-);
+const root = document.getElementById('root');
+if (root) {
+  // Connect to the server
+  const socket = io('http://localhost:3200');
+  const container = createRoot(root);
+  container.render(
+    <React.StrictMode>
+      <Router>
+        <Routes>
+          <Route path="/:lobbyKey" element={<Lobby socket={socket} />} />
+          <Route path="/" element={<Home socket={socket} />} />
+        </Routes>
+      </Router>
+    </React.StrictMode>
+  );
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

@@ -1,7 +1,7 @@
-import { Color, Core, GameState, Surface } from "dynamojs-engine";
-import { Socket } from "socket.io-client";
+import { Color, Core, GameState, Surface } from 'dynamojs-engine';
+import { Socket } from 'socket.io-client';
 import { Main } from './Main';
-import TexturesWorker from "./textures.worker";
+import TexturesWorker from './textures.worker';
 
 class Loading extends GameState {
   socket: Socket;

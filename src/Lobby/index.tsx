@@ -156,7 +156,11 @@ function Lobby({ socket }: LobbyProps) {
             />
             <ColorPicker
               color={color}
-              onChange={(color) => setColor(new Color(color.rgb.r, color.rgb.g, color.rgb.b, color.rgb.a))}
+              onChange={(color) =>
+                setColor(
+                  new Color(color.rgb.r, color.rgb.g, color.rgb.b, color.rgb.a)
+                )
+              }
             />
           </EditorContainer>
 
