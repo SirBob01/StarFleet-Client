@@ -1,5 +1,5 @@
 import { Color } from 'dynamojs-engine';
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import { EditorContainer, PixelContainer, Pixel, Label } from './EditorStyles';
 
 interface EditorProps {
@@ -10,13 +10,13 @@ interface EditorProps {
 }
 
 /**
- * Pixel editor component
+ * Pixel editor can be set to specified dimensions
  */
 function Editor({ width, height, currentColor, pixelUpdater }: EditorProps) {
   const [pixels, setPixels] = useState<Color[]>(
     Array(width * height).fill(new Color(255, 255, 255, 0))
   );
-  const [mouseHold, setMouseHold] = useState(false);
+  const [dragging, setDragging] = useState<boolean>(false);
 
   // Invalidate pixel array cache
   const updatePixels = (index: number) => {
@@ -26,21 +26,36 @@ function Editor({ width, height, currentColor, pixelUpdater }: EditorProps) {
     pixelUpdater(pixels);
   };
 
+  // Handler for starting dragging
+  const startDragging = (event: MouseEvent) => {
+    event.preventDefault();
+    setDragging(true);
+  };
+
+  // Handler for stopping dragging
+  const stopDragging = (event: MouseEvent) => {
+    event.preventDefault();
+    setDragging(false);
+  };
+
   return (
-    <EditorContainer
-      onMouseDown={() => setMouseHold(true)}
-      onMouseUp={() => setMouseHold(false)}
-    >
+    <EditorContainer onMouseDown={startDragging} onMouseUp={stopDragging}>
       <Label>Front</Label>
       <PixelContainer>
         {pixels.map((pixel, index) => {
+          const dragUpdate = () => {
+            if (dragging) {
+              updatePixels(index);
+            }
+          };
+          const clickUpdate = () => {
+            updatePixels(index);
+          };
           const pix = (
             <Pixel
               key={`pixel-${index}`}
-              onMouseEnter={() => {
-                if (mouseHold) updatePixels(index);
-              }}
-              onMouseDown={() => updatePixels(index)}
+              onMouseEnter={dragUpdate}
+              onMouseDown={clickUpdate}
               rgba={pixel}
               size={16}
             />

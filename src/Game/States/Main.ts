@@ -54,7 +54,11 @@ class Main extends GameState {
 
   private particles: any[];
 
-  constructor(socket: Socket<EmitEvents, ListenEvents>, startData: StartData, textures: any) {
+  constructor(
+    socket: Socket<EmitEvents, ListenEvents>,
+    startData: StartData,
+    textures: any
+  ) {
     super();
     this.socket = socket;
     this.textures = textures;

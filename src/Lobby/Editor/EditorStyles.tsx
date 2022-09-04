@@ -28,7 +28,7 @@ export const Pixel = styled.div<PixelProps>`
         image-rendering: pixelated;
       `;
     } else {
-      return `background-color: rgba(${r}, ${g}, ${b}, ${a});`
+      return `background-color: rgba(${r}, ${g}, ${b}, ${a});`;
     }
   }}
 
@@ -36,5 +36,4 @@ export const Pixel = styled.div<PixelProps>`
   display: inline-block;
 `;
 
-export const Label = styled.span`
-`;
+export const Label = styled.span``;

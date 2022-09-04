@@ -9,12 +9,18 @@ import { Socket } from 'socket.io-client';
 import {
   EditorContainer,
   LobbyContainer,
+  NameChangeButton,
   NameContainer,
   NameInput,
   PlayerContainer,
-  PlayerRow,
 } from './LobbyStyles';
-import { LobbyPlayer } from 'starfleet-server';
+import {
+  EmitEvents,
+  ListenEvents,
+  LobbyPlayer,
+  StartData,
+} from 'starfleet-server';
+import Player from './Player';
 
 const scoutSize = 6;
 const fighterSize = 8;
@@ -25,73 +31,60 @@ const generatePixelArray = (size: number) => {
 };
 
 interface LobbyProps {
-  socket: Socket;
+  socket: Socket<EmitEvents, ListenEvents>;
 }
 
 function Lobby({ socket }: LobbyProps) {
   const navigate = useNavigate();
+  const { lobbyKey } = useParams<string>();
 
-  const { lobbyKey } = useParams();
-  const [color, setColor] = useState(new Color(255, 255, 255, 255));
-
-  const [scoutPixels, setScoutPixels] = useState(generatePixelArray(scoutSize));
-  const [fighterPixels, setFighterPixels] = useState(
+  const [color, setColor] = useState<Color>(new Color(255, 255, 255));
+  const [scoutPixels, setScoutPixels] = useState<Color[]>(
+    generatePixelArray(scoutSize)
+  );
+  const [fighterPixels, setFighterPixels] = useState<Color[]>(
     generatePixelArray(fighterSize)
   );
-  const [carrierPixels, setCarrierPixels] = useState(
+  const [carrierPixels, setCarrierPixels] = useState<Color[]>(
     generatePixelArray(carrierSize)
   );
 
-  const [name, setName] = useState('');
-  const [isHost, setIsHost] = useState(false);
-  const [playerList, setPlayerList] = useState([]);
-  const [startData, setStartData] = useState(null);
+  const [name, setName] = useState<string>('');
+  const [isHost, setIsHost] = useState<boolean>(false);
+  const [playerList, setPlayerList] = useState<LobbyPlayer[]>([]);
+  const [startData, setStartData] = useState<StartData | null>(null);
 
-  const [returnHome, setReturnHome] = useState(false);
-
-  // Handle server interaction
+  // Socket listeners on initialization to interact with the server
   useEffect(() => {
-    let isMounted = true;
-    socket.emit('join', lobbyKey, (success: boolean) => {
-      if (isMounted) {
+    if (lobbyKey) {
+      socket.emit('join', lobbyKey, (success: boolean) => {
         if (!success) {
-          alert('Game does not exist with this key!');
-          setReturnHome(true);
+          navigate('/', {
+            replace: true,
+            state: 'Lobby does not exist',
+          });
         }
-      }
-    });
+      });
+    }
 
     socket.on('lobby', (data) => {
-      if (isMounted) {
-        setPlayerList(data.players);
-        setName(data.name);
-        setIsHost(data.isHost);
-      }
+      const host = data.players.find((player) => player.host);
+      setPlayerList(data.players);
+      setName(data.playerName);
+      setIsHost(host?.id === data.playerId);
     });
 
     socket.on('kick', () => {
-      if (isMounted) {
-        alert('You have been kicked from the game!');
-        setReturnHome(true);
-      }
+      navigate('/', {
+        replace: true,
+        state: 'You have been kicked from the lobby!',
+      });
     });
 
     socket.on('start', (data) => {
-      if (isMounted) {
-        setStartData(data);
-      }
+      setStartData(data);
     });
-    return () => {
-      isMounted = false;
-    };
   }, []);
-
-  // Handle leaving lobby
-  useEffect(() => {
-    if (returnHome) {
-      navigate('/', { replace: true });
-    }
-  }, [returnHome]);
 
   // Handle starting the game
   useEffect(() => {
@@ -103,9 +96,9 @@ function Lobby({ socket }: LobbyProps) {
   // Handle ship pixel editing
   useEffect(() => {
     socket.emit('setPixelData', {
-      scout: { size: scoutSize, buffer: scoutPixels },
-      fighter: { size: fighterSize, buffer: fighterPixels },
-      carrier: { size: carrierSize, buffer: carrierPixels },
+      scout: { size: scoutSize, colors: scoutPixels },
+      fighter: { size: fighterSize, colors: fighterPixels },
+      carrier: { size: carrierSize, colors: carrierPixels },
     });
   }, [scoutPixels, fighterPixels, carrierPixels]);
 
@@ -146,39 +139,20 @@ function Lobby({ socket }: LobbyProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button onClick={() => socket.emit('setName', name)}>
+        <NameChangeButton onClick={() => socket.emit('setName', name)}>
           Change Name
-        </button>
+        </NameChangeButton>
       </NameContainer>
 
       <PlayerContainer>
-        {playerList.map((player: LobbyPlayer) => {
-          if (player.host) {
-            return (
-              <PlayerRow key={player.id}>
-                <span style={{ color: 'red' }}>{player.name}</span>
-                {isHost ? (
-                  <button onClick={() => socket.emit('start')}>
-                    Start
-                  </button>
-                ) : null}
-                <br />
-              </PlayerRow>
-            );
-          } else {
-            return (
-              <PlayerRow key={player.id}>
-                <span style={{ color: 'white' }}>{player.name}</span>
-                {isHost ? (
-                  <button onClick={() => socket.emit('kick', player.id)}>
-                    Kick
-                  </button>
-                ) : null}
-                <br />
-              </PlayerRow>
-            );
-          }
-        })}
+        {playerList.map((player: LobbyPlayer) => (
+          <Player
+            key={player.id}
+            playerData={player}
+            isHost={isHost}
+            socket={socket}
+          />
+        ))}
       </PlayerContainer>
     </LobbyContainer>
   );
