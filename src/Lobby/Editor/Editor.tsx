@@ -1,17 +1,20 @@
 import { Color } from 'dynamojs-engine';
 import React, { useState } from 'react';
-import { EditorContainer, Pixel, PixelContainer } from './EditorStyles';
+import { EditorContainer, PixelContainer, Pixel, Label } from './EditorStyles';
 
 interface EditorProps {
-  currentColor: Color;
-  pixelUpdater: (pixels: Color[]) => void;
   width: number;
   height: number;
+  currentColor: Color;
+  pixelUpdater: (pixels: Color[]) => void;
 }
 
-function Editor({ currentColor, pixelUpdater, width, height }: EditorProps) {
-  const [pixels, setPixels] = useState(
-    Array(width * height).fill({ r: 255, g: 255, b: 255, a: 0 })
+/**
+ * Pixel editor component
+ */
+function Editor({ width, height, currentColor, pixelUpdater }: EditorProps) {
+  const [pixels, setPixels] = useState<Color[]>(
+    Array(width * height).fill(new Color(255, 255, 255, 0))
   );
   const [mouseHold, setMouseHold] = useState(false);
 
@@ -28,7 +31,7 @@ function Editor({ currentColor, pixelUpdater, width, height }: EditorProps) {
       onMouseDown={() => setMouseHold(true)}
       onMouseUp={() => setMouseHold(false)}
     >
-      <span>Front</span>
+      <Label>Front</Label>
       <PixelContainer>
         {pixels.map((pixel, index) => {
           const pix = (
@@ -38,13 +41,13 @@ function Editor({ currentColor, pixelUpdater, width, height }: EditorProps) {
                 if (mouseHold) updatePixels(index);
               }}
               onMouseDown={() => updatePixels(index)}
-              color={pixel}
+              rgba={pixel}
               size={16}
             />
           );
           if ((index + 1) % width === 0) {
             return (
-              <span key={`pixel-${index}`}>
+              <span key={`pixel-row-${index}`}>
                 {pix}
                 <br />
               </span>
@@ -53,7 +56,7 @@ function Editor({ currentColor, pixelUpdater, width, height }: EditorProps) {
           return pix;
         })}
       </PixelContainer>
-      <span>Back</span>
+      <Label>Back</Label>
     </EditorContainer>
   );
 }

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 interface PixelProps {
   readonly size: number;
-  readonly color: Color;
+  readonly rgba: Color;
 }
 
 export const EditorContainer = styled.div`
@@ -19,18 +19,22 @@ export const PixelContainer = styled.div`
 export const Pixel = styled.div<PixelProps>`
   width: ${({ size }) => `${size}px`};
   height: ${({ size }) => `${size}px`};
-  background-color: ${({ color }) =>
-    `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`};
-  ${({ color }) => {
-    if (color.a === 0) {
+  ${({ rgba }) => {
+    const { r, g, b, a } = rgba;
+    if (a === 0) {
       return `
         background-image: url('assets/transparent.png');
         background-size: cover;
         image-rendering: pixelated;
       `;
+    } else {
+      return `background-color: rgba(${r}, ${g}, ${b}, ${a});`
     }
   }}
 
   border: 1px solid #AAAAAA;
   display: inline-block;
+`;
+
+export const Label = styled.span`
 `;

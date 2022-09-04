@@ -1,1 +1,1 @@
-export { Loading } from './States';
+export { default as Game } from './Game';

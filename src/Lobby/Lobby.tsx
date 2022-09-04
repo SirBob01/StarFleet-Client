@@ -4,18 +4,17 @@ import { useNavigate, useParams } from 'react-router';
 import { SketchPicker as ColorPicker } from 'react-color';
 import { Editor } from './Editor';
 
-import dynamo, { Color } from 'dynamojs-engine';
-import { Loading } from '../Game';
+import { Color } from 'dynamojs-engine';
 import { Socket } from 'socket.io-client';
 import {
   EditorContainer,
-  Game,
   LobbyContainer,
   NameContainer,
   NameInput,
   PlayerContainer,
   PlayerRow,
 } from './LobbyStyles';
+import { LobbyPlayer } from 'starfleet-server';
 
 const scoutSize = 6;
 const fighterSize = 8;
@@ -97,8 +96,7 @@ function Lobby({ socket }: LobbyProps) {
   // Handle starting the game
   useEffect(() => {
     if (startData !== null) {
-      const engine = new dynamo.Engine(new Loading(socket, startData));
-      engine.run();
+      navigate('play', { state: startData });
     }
   }, [startData]);
 
@@ -112,83 +110,77 @@ function Lobby({ socket }: LobbyProps) {
   }, [scoutPixels, fighterPixels, carrierPixels]);
 
   return (
-    <>
-      {startData ? (
-        <Game id="display" />
-      ) : (
-        <LobbyContainer>
-          <EditorContainer>
-            <Editor
-              currentColor={color}
-              pixelUpdater={setScoutPixels}
-              width={scoutSize}
-              height={scoutSize}
-            />
-            <Editor
-              currentColor={color}
-              pixelUpdater={setFighterPixels}
-              width={fighterSize}
-              height={fighterSize}
-            />
-            <Editor
-              currentColor={color}
-              pixelUpdater={setCarrierPixels}
-              width={carrierSize}
-              height={carrierSize}
-            />
-            <ColorPicker
-              color={color}
-              onChange={(color) =>
-                setColor(
-                  new Color(color.rgb.r, color.rgb.g, color.rgb.b, color.rgb.a)
-                )
-              }
-            />
-          </EditorContainer>
+    <LobbyContainer>
+      <EditorContainer>
+        <Editor
+          currentColor={color}
+          pixelUpdater={setScoutPixels}
+          width={scoutSize}
+          height={scoutSize}
+        />
+        <Editor
+          currentColor={color}
+          pixelUpdater={setFighterPixels}
+          width={fighterSize}
+          height={fighterSize}
+        />
+        <Editor
+          currentColor={color}
+          pixelUpdater={setCarrierPixels}
+          width={carrierSize}
+          height={carrierSize}
+        />
+        <ColorPicker
+          color={color}
+          onChange={(color) =>
+            setColor(
+              new Color(color.rgb.r, color.rgb.g, color.rgb.b, color.rgb.a)
+            )
+          }
+        />
+      </EditorContainer>
 
-          <NameContainer>
-            <NameInput
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <button onClick={() => socket.emit('setName', name)}>
-              Change Name
-            </button>
-          </NameContainer>
+      <NameContainer>
+        <NameInput
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button onClick={() => socket.emit('setName', name)}>
+          Change Name
+        </button>
+      </NameContainer>
 
-          <PlayerContainer>
-            {playerList.map((player: any, index) => {
-              if (player.host) {
-                return (
-                  <PlayerRow key={player.id}>
-                    <span style={{ color: 'red' }}>{player.name}</span>
-                    {isHost ? (
-                      <button onClick={() => socket.emit('start')}>
-                        Start
-                      </button>
-                    ) : null}
-                    <br />
-                  </PlayerRow>
-                );
-              } else {
-                return (
-                  <PlayerRow key={player.id}>
-                    <span style={{ color: 'white' }}>{player.name}</span>
-                    {isHost ? (
-                      <button onClick={() => socket.emit('kick', player.id)}>
-                        Kick
-                      </button>
-                    ) : null}
-                    <br />
-                  </PlayerRow>
-                );
-              }
-            })}
-          </PlayerContainer>
-        </LobbyContainer>
-      )}
-    </>
+      <PlayerContainer>
+        {playerList.map((player: LobbyPlayer) => {
+          if (player.host) {
+            return (
+              <PlayerRow key={player.id}>
+                <span style={{ color: 'red' }}>{player.name}</span>
+                {isHost ? (
+                  <button onClick={() => socket.emit('start')}>
+                    Start
+                  </button>
+                ) : null}
+                <br />
+              </PlayerRow>
+            );
+          } else {
+            return (
+              <PlayerRow key={player.id}>
+                <span style={{ color: 'white' }}>{player.name}</span>
+                {isHost ? (
+                  <button onClick={() => socket.emit('kick', player.id)}>
+                    Kick
+                  </button>
+                ) : null}
+                <br />
+              </PlayerRow>
+            );
+          }
+        })}
+      </PlayerContainer>
+    </LobbyContainer>
   );
 }
 

@@ -1,29 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
+import { EmitEvents, ListenEvents } from 'starfleet-server';
+import { HomeContainer, CreateButton, CodeInput, JoinButton } from './HomeStyles';
 
 interface HomeProps {
-  socket: Socket;
+  socket: Socket<EmitEvents, ListenEvents>;
 }
 
+/**
+ * Home page
+ * 
+ * Here, the user can either create a new game lobby or join an 
+ * existing one by typing in a code
+ */
 function Home({ socket }: HomeProps) {
   const navigate = useNavigate();
 
   const [hostKey, setHostKey] = useState<string | null>(null);
-  const [keyInput, setKeyInput] = useState<string | null>(null);
+  const [keyInput, setKeyInput] = useState<string>('');
 
+  // Navigate to the entered host key if valid
   useEffect(() => {
     if (hostKey !== null) {
       navigate(`/${hostKey}`, { replace: true });
     }
   }, [hostKey]);
 
-  const createGame = () => {
+  // Handler for creating a new lobby
+  const createLobby = () => {
     socket.emit('create', (key: string) => {
       setHostKey(key);
     });
   };
-  const joinGame = () => {
+  
+  // Handler for joining an existing lobby
+  const joinLobby = () => {
     socket.emit('join', keyInput, (success: boolean) => {
       if (success) {
         setHostKey(keyInput);
@@ -34,12 +46,12 @@ function Home({ socket }: HomeProps) {
   };
 
   return (
-    <div>
+    <HomeContainer>
       Starfleet
-      <button onClick={createGame}>Create Game</button>
-      <input type="text" onChange={(e) => setKeyInput(e.target.value)} />
-      <button onClick={joinGame}>Join Game</button>
-    </div>
+      <CreateButton onClick={createLobby}>Create Game</CreateButton>
+      <CodeInput type="text" onChange={(e) => setKeyInput(e.target.value)} />
+      <JoinButton onClick={joinLobby}>Join Game</JoinButton>
+    </HomeContainer>
   );
 }
 

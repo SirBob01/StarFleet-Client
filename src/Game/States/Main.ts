@@ -8,6 +8,7 @@ import {
   Core,
 } from 'dynamojs-engine';
 import { Socket } from 'socket.io-client';
+import { EmitEvents, ListenEvents, StartData } from 'starfleet-server';
 import { Camera, Minimap, Starfield, SelectBox } from '../Internal';
 
 function generateSprite(colorData: any) {
@@ -33,7 +34,7 @@ function generateSprite(colorData: any) {
 }
 
 class Main extends GameState {
-  private socket: Socket;
+  private socket: Socket<EmitEvents, ListenEvents>;
 
   private minimap: Minimap | undefined;
 
@@ -53,7 +54,7 @@ class Main extends GameState {
 
   private particles: any[];
 
-  constructor(socket: Socket, startData: any, textures: any) {
+  constructor(socket: Socket<EmitEvents, ListenEvents>, startData: StartData, textures: any) {
     super();
     this.socket = socket;
     this.textures = textures;

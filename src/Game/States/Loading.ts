@@ -1,14 +1,15 @@
 import { Color, Core, GameState, Surface } from 'dynamojs-engine';
 import { Socket } from 'socket.io-client';
+import { EmitEvents, ListenEvents, StartData } from 'starfleet-server';
 import { Main } from './Main';
 import TexturesWorker from './textures.worker';
 
 class Loading extends GameState {
-  socket: Socket;
+  socket: Socket<EmitEvents, ListenEvents>;
 
-  startData: any;
+  startData: StartData;
 
-  constructor(socket: Socket, startData: any) {
+  constructor(socket: Socket<EmitEvents, ListenEvents>, startData: StartData) {
     super();
     this.socket = socket;
     this.startData = startData;

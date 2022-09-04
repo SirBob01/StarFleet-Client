@@ -1,24 +1,27 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+import { EmitEvents, ListenEvents } from 'starfleet-server';
 
 import './index.css';
 import { Home } from './Home';
 import { Lobby } from './Lobby';
+import { Game } from './Game';
 
 import reportWebVitals from './reportWebVitals';
 
 const root = document.getElementById('root');
 if (root) {
   // Connect to the server
-  const socket = io('http://localhost:3200');
+  const socket: Socket<EmitEvents, ListenEvents> = io('http://localhost:3200');
   const container = createRoot(root);
   container.render(
     <React.StrictMode>
       <Router>
         <Routes>
           <Route path="/:lobbyKey" element={<Lobby socket={socket} />} />
+          <Route path="/:lobbyKey/play" element={<Game socket={socket} />} />
           <Route path="/" element={<Home socket={socket} />} />
         </Routes>
       </Router>
